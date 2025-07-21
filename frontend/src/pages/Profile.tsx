@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
+import { getAssetUrl } from '../utils/urls';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -33,10 +34,6 @@ const Profile: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>('');
 
-  console.log('Profile component rendered, user:', user);
-  console.log('Profile state:', profile);
-  console.log('Loading state:', loading);
-
   const [editData, setEditData] = useState({
     firstName: '',
     lastName: '',
@@ -45,23 +42,15 @@ const Profile: React.FC = () => {
     showProfile: true
   });
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Fetching profile...');
       
       // Fetch both profile and dashboard data
       const [profileResponse, dashboardResponse] = await Promise.all([
         authService.getProfile(),
         authService.getDashboard()
       ]);
-      
-      console.log('Profile response:', profileResponse);
-      console.log('Dashboard response:', dashboardResponse);
       
       // Handle the response based on the backend format
       let profileData;
@@ -73,7 +62,6 @@ const Profile: React.FC = () => {
         profileData = profileResponse;
       }
       
-      console.log('Profile data:', profileData);
       setProfile(profileData);
       setDashboardData(dashboardResponse.data || dashboardResponse);
       
@@ -87,24 +75,27 @@ const Profile: React.FC = () => {
 
       // Fix avatar display - handle both relative and absolute URLs
       if (profileData.avatar) {
-        const avatarUrl = profileData.avatar.startsWith('http') 
-          ? profileData.avatar 
-          : `http://localhost:5000${profileData.avatar}`;
+        const avatarUrl = getAssetUrl(profileData.avatar);
         setAvatarPreview(avatarUrl);
-      }
-      
-      // Update the AuthContext user data with the latest profile info
-      if (profileData.avatar && user) {
-        const updatedUser = { ...user, avatar: profileData.avatar };
-        window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUser }));
       }
     } catch (err: any) {
       console.error('Profile fetch error:', err);
-      setError(err.response?.data?.message || 'Failed to fetch profile');
+      
+      // Handle 401 Unauthorized errors (expired token)
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please log in again.');
+        return;
+      }
+      
+      setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
