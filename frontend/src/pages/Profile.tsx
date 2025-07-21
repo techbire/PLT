@@ -81,12 +81,6 @@ const Profile: React.FC = () => {
           const avatarUrl = getAssetUrl(profileData.avatar);
           setAvatarPreview(avatarUrl);
         }
-        
-        // Update the AuthContext user data with the latest profile info
-        if (profileData.avatar && user) {
-          const updatedUser = { ...user, avatar: profileData.avatar };
-          window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUser }));
-        }
       } catch (err: any) {
         console.error('Profile fetch error:', err);
         setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
@@ -110,7 +104,7 @@ const Profile: React.FC = () => {
     fetchProfile();
   }, [user?.id]); // Only depend on user ID
 
-  const fetchProfile = useCallback(async () => {
+  const refetchProfile = useCallback(async () => {
     if (!user?.id) return;
     
     try {
@@ -148,27 +142,9 @@ const Profile: React.FC = () => {
         const avatarUrl = getAssetUrl(profileData.avatar);
         setAvatarPreview(avatarUrl);
       }
-      
-      // Update the AuthContext user data with the latest profile info
-      if (profileData.avatar && user) {
-        const updatedUser = { ...user, avatar: profileData.avatar };
-        window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUser }));
-      }
     } catch (err: any) {
       console.error('Profile fetch error:', err);
       setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
-      
-      // If blocked by client (ad blocker), try to show cached user data
-      if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && user) {
-        setProfile(user);
-        setEditData({
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          bio: '',
-          readingGoal: user.readingGoal?.yearly || 12,
-          showProfile: true
-        });
-      }
     } finally {
       setLoading(false);
     }
@@ -222,7 +198,7 @@ const Profile: React.FC = () => {
       setEditing(false);
       
       // Re-fetch profile to get the latest data
-      await fetchProfile();
+      await refetchProfile();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update profile');
     } finally {
