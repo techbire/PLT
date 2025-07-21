@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Alert } from '@mui/material';
+import { Box, Alert } from '@mui/material';
 
 const DebugInfo: React.FC = () => {
   if (process.env.NODE_ENV !== 'production') return null;
