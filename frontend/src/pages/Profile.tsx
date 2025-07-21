@@ -105,7 +105,7 @@ const Profile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchProfile();
