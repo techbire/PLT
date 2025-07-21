@@ -46,9 +46,9 @@ const Profile: React.FC = () => {
     if (!user?.id) return;
     
     const userId = user.id;
-    const userFirstName = user.firstName;
-    const userLastName = user.lastName;
-    const userReadingGoal = user.readingGoal;
+    const userFirstName = user.firstName || '';
+    const userLastName = user.lastName || '';
+    const userReadingGoal = user.readingGoal || { yearly: 12 };
     
     const fetchProfile = async () => {
       try {
@@ -88,6 +88,15 @@ const Profile: React.FC = () => {
         }
       } catch (err: any) {
         console.error('Profile fetch error:', err);
+        
+        // Handle 401 Unauthorized errors (expired token)
+        if (err.response?.status === 401) {
+          setError('Your session has expired. Please log in again.');
+          // Optional: You could also redirect to login page here
+          // window.location.href = '/login';
+          return;
+        }
+        
         setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
         
         // If blocked by client (ad blocker), try to show cached user data
@@ -96,11 +105,13 @@ const Profile: React.FC = () => {
             id: userId,
             firstName: userFirstName,
             lastName: userLastName,
-            readingGoal: userReadingGoal
+            readingGoal: userReadingGoal,
+            username: user.username || '',
+            email: user.email || ''
           });
           setEditData({
-            firstName: userFirstName || '',
-            lastName: userLastName || '',
+            firstName: userFirstName,
+            lastName: userLastName,
             bio: '',
             readingGoal: userReadingGoal?.yearly || 12,
             showProfile: true
@@ -112,7 +123,7 @@ const Profile: React.FC = () => {
     };
 
     fetchProfile();
-  }, [user?.id, user?.firstName, user?.lastName, user?.readingGoal]); // Include all user properties we actually use
+  }, [user?.id]); // Only depend on user ID to prevent infinite loops with incomplete user data
 
   const refetchProfile = useCallback(async () => {
     if (!user?.id) return;
@@ -154,6 +165,13 @@ const Profile: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Profile fetch error:', err);
+      
+      // Handle 401 Unauthorized errors (expired token)
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please log in again.');
+        return;
+      }
+      
       setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
     } finally {
       setLoading(false);
