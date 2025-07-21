@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -42,15 +42,17 @@ const Profile: React.FC = () => {
     showProfile: true
   });
 
+  const userMemo = useMemo(() => ({
+    id: user?.id || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    readingGoal: user?.readingGoal || { yearly: 12 },
+    username: user?.username || '',
+    email: user?.email || ''
+  }), [user?.id]);
+
   useEffect(() => {
-    if (!user?.id) return;
-    
-    const userId = user.id;
-    const userFirstName = user.firstName || '';
-    const userLastName = user.lastName || '';
-    const userReadingGoal = user.readingGoal || { yearly: 12 };
-    const userUsername = user.username || '';
-    const userEmail = user.email || '';
+    if (!userMemo.id) return;
     
     const fetchProfile = async () => {
       try {
@@ -94,28 +96,26 @@ const Profile: React.FC = () => {
         // Handle 401 Unauthorized errors (expired token)
         if (err.response?.status === 401) {
           setError('Your session has expired. Please log in again.');
-          // Optional: You could also redirect to login page here
-          // window.location.href = '/login';
           return;
         }
         
         setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
         
         // If blocked by client (ad blocker), try to show cached user data
-        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && userId) {
+        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && userMemo.id) {
           setProfile({
-            id: userId,
-            firstName: userFirstName,
-            lastName: userLastName,
-            readingGoal: userReadingGoal,
-            username: userUsername,
-            email: userEmail
+            id: userMemo.id,
+            firstName: userMemo.firstName,
+            lastName: userMemo.lastName,
+            readingGoal: userMemo.readingGoal,
+            username: userMemo.username,
+            email: userMemo.email
           });
           setEditData({
-            firstName: userFirstName,
-            lastName: userLastName,
+            firstName: userMemo.firstName,
+            lastName: userMemo.lastName,
             bio: '',
-            readingGoal: userReadingGoal?.yearly || 12,
+            readingGoal: userMemo.readingGoal?.yearly || 12,
             showProfile: true
           });
         }
@@ -125,7 +125,7 @@ const Profile: React.FC = () => {
     };
 
     fetchProfile();
-  }, [user?.id]); // Only depend on user ID to prevent infinite loops
+  }, [userMemo]);
 
   const refetchProfile = useCallback(async () => {
     if (!user?.id) return;
