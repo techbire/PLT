@@ -1,0 +1,9 @@
+export { default as Login } from './Login';
+export { default as Register } from './Register';
+export { default as Dashboard } from './Dashboard';
+export { default as Books } from './Books';
+export { default as AddBook } from './AddBook';
+export { default as BookDetail } from './BookDetail';
+export { default as EditBook } from './EditBook';
+export { default as Profile } from './Profile';
+export { default as Friends } from './Friends';
