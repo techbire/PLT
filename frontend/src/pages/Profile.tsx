@@ -49,6 +49,8 @@ const Profile: React.FC = () => {
     const userFirstName = user.firstName || '';
     const userLastName = user.lastName || '';
     const userReadingGoal = user.readingGoal || { yearly: 12 };
+    const userUsername = user.username || '';
+    const userEmail = user.email || '';
     
     const fetchProfile = async () => {
       try {
@@ -106,8 +108,8 @@ const Profile: React.FC = () => {
             firstName: userFirstName,
             lastName: userLastName,
             readingGoal: userReadingGoal,
-            username: user.username || '',
-            email: user.email || ''
+            username: userUsername,
+            email: userEmail
           });
           setEditData({
             firstName: userFirstName,
@@ -123,7 +125,7 @@ const Profile: React.FC = () => {
     };
 
     fetchProfile();
-  }, [user?.id]); // Only depend on user ID to prevent infinite loops with incomplete user data
+  }, [user?.id]); // Only depend on user ID to prevent infinite loops
 
   const refetchProfile = useCallback(async () => {
     if (!user?.id) return;
