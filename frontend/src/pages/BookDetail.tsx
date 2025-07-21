@@ -37,25 +37,25 @@ const BookDetail: React.FC = () => {
   const [reviewComment, setReviewComment] = useState('');
 
   useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        setLoading(true);
+        if (id) {
+          const response = await bookService.getBook(id);
+          setBook(response.book);
+          setNewProgress(response.book.readingProgress?.currentPage || 0);
+          setReviewRating(response.book.review?.rating || 0);
+          setReviewComment(response.book.review?.comment || '');
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to fetch book');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBook();
   }, [id]);
-
-  const fetchBook = async () => {
-    try {
-      setLoading(true);
-      if (id) {
-        const response = await bookService.getBook(id);
-        setBook(response.book);
-        setNewProgress(response.book.readingProgress?.currentPage || 0);
-        setReviewRating(response.book.review?.rating || 0);
-        setReviewComment(response.book.review?.comment || '');
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch book');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleUpdateProgress = async () => {
     try {

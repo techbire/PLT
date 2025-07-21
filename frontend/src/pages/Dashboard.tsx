@@ -5,7 +5,6 @@ import {
   Box,
   Card,
   CardContent,
-  Grid,
   CircularProgress,
   LinearProgress,
   Alert,
@@ -17,7 +16,7 @@ import {
   Bookmark as BookmarkIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
-import bookService, { BookStats } from '../services/bookService';
+import bookService from '../services/bookService';
 
 interface DashboardStats {
   'To Read': number;

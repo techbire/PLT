@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -42,7 +42,7 @@ const Books: React.FC = () => {
   const [statusMenuAnchor, setStatusMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
 
-  const fetchBooks = async (page = 1) => {
+  const fetchBooks = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const params: any = { page, limit: 12 };
@@ -59,12 +59,11 @@ const Books: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchQuery, statusFilter]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchBooks(1);
-  }, [searchQuery, statusFilter]);
+  }, [fetchBooks]);
 
   const handleSearch = () => {
     fetchBooks(1);

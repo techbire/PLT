@@ -9,8 +9,7 @@ import {
   Button,
   MenuItem,
   Alert,
-  Avatar,
-  InputAdornment
+  Avatar
 } from '@mui/material';
 import {
   Save as SaveIcon,
@@ -57,38 +56,38 @@ const EditBook: React.FC = () => {
   ];
 
   useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        setLoading(true);
+        if (id) {
+          const response = await bookService.getBook(id);
+          const book = response.book;
+          
+          setFormData({
+            title: book.title || '',
+            author: book.author || '',
+            genre: book.genre || '',
+            status: book.status || 'To Read',
+            description: book.description || '',
+            isbn: book.isbn || '',
+            publishedDate: book.publishedDate || '',
+            pageCount: book.pageCount?.toString() || '',
+            language: book.language || ''
+          });
+          
+          if (book.coverImage) {
+            setCoverPreview(book.coverImage);
+          }
+        }
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Failed to fetch book');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBook();
   }, [id]);
-
-  const fetchBook = async () => {
-    try {
-      setLoading(true);
-      if (id) {
-        const response = await bookService.getBook(id);
-        const book = response.book;
-        
-        setFormData({
-          title: book.title || '',
-          author: book.author || '',
-          genre: book.genre || '',
-          status: book.status || 'To Read',
-          description: book.description || '',
-          isbn: book.isbn || '',
-          publishedDate: book.publishedDate || '',
-          pageCount: book.pageCount?.toString() || '',
-          language: book.language || ''
-        });
-        
-        if (book.coverImage) {
-          setCoverPreview(book.coverImage);
-        }
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch book');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
