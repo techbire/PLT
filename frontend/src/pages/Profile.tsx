@@ -86,13 +86,14 @@ const Profile: React.FC = () => {
         setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
         
         // If blocked by client (ad blocker), try to show cached user data
-        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && user) {
-          setProfile(user);
+        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && user?.id) {
+          const currentUser = user;
+          setProfile(currentUser);
           setEditData({
-            firstName: user.firstName || '',
-            lastName: user.lastName || '',
+            firstName: currentUser.firstName || '',
+            lastName: currentUser.lastName || '',
             bio: '',
-            readingGoal: user.readingGoal?.yearly || 12,
+            readingGoal: currentUser.readingGoal?.yearly || 12,
             showProfile: true
           });
         }
@@ -102,7 +103,7 @@ const Profile: React.FC = () => {
     };
 
     fetchProfile();
-  }, [user?.id]); // Only depend on user ID
+  }, [user?.id, user?.firstName, user?.lastName, user?.readingGoal]); // Include all user properties we actually use
 
   const refetchProfile = useCallback(async () => {
     if (!user?.id) return;
