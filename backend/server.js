@@ -20,26 +20,31 @@ app.use(helmet({
 // CORS configuration
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log('CORS check for origin:', origin);
+    
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
+    
+    // Always allow Vercel preview URLs
+    if (origin?.includes('vercel.app')) {
+      console.log('Allowing Vercel origin:', origin);
+      return callback(null, true);
+    }
     
     const allowedOrigins = process.env.FRONTEND_URL 
       ? process.env.FRONTEND_URL.split(',')
       : ['http://localhost:3000'];
     
-    // Add your Vercel URL as fallback
+    // Add your specific Vercel URL as fallback
     allowedOrigins.push('https://plt-p8jz2joej-techbires-projects.vercel.app');
     
-    // In development, allow all Vercel preview URLs
-    if (process.env.NODE_ENV !== 'production' || origin?.includes('vercel.app')) {
-      return callback(null, true);
-    }
+    console.log('Allowed origins:', allowedOrigins);
     
     if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('Origin allowed:', origin);
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
-      console.log('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -73,29 +78,6 @@ app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 }, express.static('uploads'));
-
-// Test endpoint for static files
-app.get('/api/test-upload', (req, res) => {
-  const fs = require('fs');
-  const path = require('path');
-  
-  const uploadsDir = path.join(__dirname, 'uploads');
-  const booksDir = path.join(uploadsDir, 'books');
-  
-  try {
-    const booksFiles = fs.readdirSync(booksDir);
-    res.json({
-      message: 'Upload directory test',
-      uploadsDir,
-      booksDir,
-      booksFiles,
-      staticUrl: '/uploads/books/',
-      sampleUrl: booksFiles.length > 0 ? `/uploads/books/${booksFiles[0]}` : null
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Routes
 app.use('/api/auth', authRoutes);
