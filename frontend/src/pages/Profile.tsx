@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -21,7 +21,6 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
-import { getAssetUrl } from '../utils/urls';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -34,6 +33,10 @@ const Profile: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>('');
 
+  console.log('Profile component rendered, user:', user);
+  console.log('Profile state:', profile);
+  console.log('Loading state:', loading);
+
   const [editData, setEditData] = useState({
     firstName: '',
     lastName: '',
@@ -42,102 +45,23 @@ const Profile: React.FC = () => {
     showProfile: true
   });
 
-  const userMemo = useMemo(() => ({
-    id: user?.id || '',
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    readingGoal: user?.readingGoal || { yearly: 12 },
-    username: user?.username || '',
-    email: user?.email || ''
-  }), [user?.id]);
-
   useEffect(() => {
-    if (!userMemo.id) return;
-    
-    const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        
-        // Fetch both profile and dashboard data
-        const [profileResponse, dashboardResponse] = await Promise.all([
-          authService.getProfile(),
-          authService.getDashboard()
-        ]);
-        
-        // Handle the response based on the backend format
-        let profileData;
-        if (profileResponse.user) {
-          profileData = profileResponse.user;
-        } else if (profileResponse.data && profileResponse.data.user) {
-          profileData = profileResponse.data.user;
-        } else {
-          profileData = profileResponse;
-        }
-        
-        setProfile(profileData);
-        setDashboardData(dashboardResponse.data || dashboardResponse);
-        
-        setEditData({
-          firstName: profileData.firstName || '',
-          lastName: profileData.lastName || '',
-          bio: profileData.bio || '',
-          readingGoal: profileData.preferences?.readingGoal || profileData.readingGoal?.yearly || 12,
-          showProfile: profileData.preferences?.privacy?.showProfile ?? true
-        });
-
-        // Fix avatar display - handle both relative and absolute URLs
-        if (profileData.avatar) {
-          const avatarUrl = getAssetUrl(profileData.avatar);
-          setAvatarPreview(avatarUrl);
-        }
-      } catch (err: any) {
-        console.error('Profile fetch error:', err);
-        
-        // Handle 401 Unauthorized errors (expired token)
-        if (err.response?.status === 401) {
-          setError('Your session has expired. Please log in again.');
-          return;
-        }
-        
-        setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
-        
-        // If blocked by client (ad blocker), try to show cached user data
-        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && userMemo.id) {
-          setProfile({
-            id: userMemo.id,
-            firstName: userMemo.firstName,
-            lastName: userMemo.lastName,
-            readingGoal: userMemo.readingGoal,
-            username: userMemo.username,
-            email: userMemo.email
-          });
-          setEditData({
-            firstName: userMemo.firstName,
-            lastName: userMemo.lastName,
-            bio: '',
-            readingGoal: userMemo.readingGoal?.yearly || 12,
-            showProfile: true
-          });
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProfile();
-  }, [userMemo]);
+  }, []);
 
-  const refetchProfile = useCallback(async () => {
-    if (!user?.id) return;
-    
+  const fetchProfile = async () => {
     try {
       setLoading(true);
+      console.log('Fetching profile...');
       
       // Fetch both profile and dashboard data
       const [profileResponse, dashboardResponse] = await Promise.all([
         authService.getProfile(),
         authService.getDashboard()
       ]);
+      
+      console.log('Profile response:', profileResponse);
+      console.log('Dashboard response:', dashboardResponse);
       
       // Handle the response based on the backend format
       let profileData;
@@ -149,6 +73,7 @@ const Profile: React.FC = () => {
         profileData = profileResponse;
       }
       
+      console.log('Profile data:', profileData);
       setProfile(profileData);
       setDashboardData(dashboardResponse.data || dashboardResponse);
       
@@ -162,23 +87,24 @@ const Profile: React.FC = () => {
 
       // Fix avatar display - handle both relative and absolute URLs
       if (profileData.avatar) {
-        const avatarUrl = getAssetUrl(profileData.avatar);
+        const avatarUrl = profileData.avatar.startsWith('http') 
+          ? profileData.avatar 
+          : `http://localhost:5000${profileData.avatar}`;
         setAvatarPreview(avatarUrl);
+      }
+      
+      // Update the AuthContext user data with the latest profile info
+      if (profileData.avatar && user) {
+        const updatedUser = { ...user, avatar: profileData.avatar };
+        window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUser }));
       }
     } catch (err: any) {
       console.error('Profile fetch error:', err);
-      
-      // Handle 401 Unauthorized errors (expired token)
-      if (err.response?.status === 401) {
-        setError('Your session has expired. Please log in again.');
-        return;
-      }
-      
-      setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
+      setError(err.response?.data?.message || 'Failed to fetch profile');
     } finally {
       setLoading(false);
     }
-  }, [user?.id]); // Only depend on user ID
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -228,7 +154,7 @@ const Profile: React.FC = () => {
       setEditing(false);
       
       // Re-fetch profile to get the latest data
-      await refetchProfile();
+      await fetchProfile();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update profile');
     } finally {
