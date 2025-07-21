@@ -27,9 +27,19 @@ const corsOptions = {
       ? process.env.FRONTEND_URL.split(',')
       : ['http://localhost:3000'];
     
+    // Add your Vercel URL as fallback
+    allowedOrigins.push('https://plt-p8jz2joej-techbires-projects.vercel.app');
+    
+    // In development, allow all Vercel preview URLs
+    if (process.env.NODE_ENV !== 'production' || origin?.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
+      console.log('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
