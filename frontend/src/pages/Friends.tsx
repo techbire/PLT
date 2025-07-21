@@ -18,6 +18,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
+import { getAssetUrl } from '../utils/urls';
 
 interface User {
   _id: string;
@@ -78,10 +79,7 @@ const Friends: React.FC = () => {
 
   const getAvatarUrl = (avatarPath: string) => {
     if (!avatarPath) return undefined;
-    if (avatarPath.startsWith('http')) {
-      return avatarPath;
-    }
-    return `http://localhost:5000${avatarPath}`;
+    return getAssetUrl(avatarPath);
   };
 
   const isCurrentUser = (userObj: User) => {

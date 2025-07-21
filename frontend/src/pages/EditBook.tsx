@@ -18,6 +18,7 @@ import {
   Image as ImageIcon
 } from '@mui/icons-material';
 import { bookService } from '../services/bookService';
+import { getAssetUrl } from '../utils/urls';
 
 const EditBook: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -175,7 +176,7 @@ const EditBook: React.FC = () => {
                 
                 {coverPreview ? (
                   <img
-                    src={coverPreview.startsWith('http') ? coverPreview : `http://localhost:5000${coverPreview}`}
+                    src={getAssetUrl(coverPreview)}
                     alt="Cover Preview"
                     style={{
                       width: '100%',
