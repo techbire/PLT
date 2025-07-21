@@ -34,10 +34,6 @@ const Profile: React.FC = () => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>('');
 
-  console.log('Profile component rendered, user:', user);
-  console.log('Profile state:', profile);
-  console.log('Loading state:', loading);
-
   const [editData, setEditData] = useState({
     firstName: '',
     lastName: '',
@@ -54,16 +50,12 @@ const Profile: React.FC = () => {
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Fetching profile...');
       
       // Fetch both profile and dashboard data
       const [profileResponse, dashboardResponse] = await Promise.all([
         authService.getProfile(),
         authService.getDashboard()
       ]);
-      
-      console.log('Profile response:', profileResponse);
-      console.log('Dashboard response:', dashboardResponse);
       
       // Handle the response based on the backend format
       let profileData;
@@ -75,7 +67,6 @@ const Profile: React.FC = () => {
         profileData = profileResponse;
       }
       
-      console.log('Profile data:', profileData);
       setProfile(profileData);
       setDashboardData(dashboardResponse.data || dashboardResponse);
       
@@ -99,7 +90,6 @@ const Profile: React.FC = () => {
         window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUser }));
       }
     } catch (err: any) {
-      console.error('Profile fetch error:', err);
       setError(err.response?.data?.message || 'Failed to fetch profile');
     } finally {
       setLoading(false);

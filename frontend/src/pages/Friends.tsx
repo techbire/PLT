@@ -58,12 +58,9 @@ const Friends: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      console.log('Fetching all users...');
       const response = await authService.getAllUsers();
-      console.log('Response:', response);
       setUsers(response.users || []);
     } catch (err: any) {
-      console.error('Error fetching users:', err);
       setError(err.response?.data?.message || 'Failed to fetch users');
     } finally {
       setLoading(false);
@@ -84,12 +81,6 @@ const Friends: React.FC = () => {
 
   const isCurrentUser = (userObj: User) => {
     if (!user) return false;
-    console.log('Checking if current user:', {
-      userObj_id: userObj._id,
-      user_id: user.id,
-      user_full: user,
-      isMatch: userObj._id === user.id
-    });
     // Check both id and _id to handle different formats
     return userObj._id === user.id || userObj._id === (user as any)._id;
   };
