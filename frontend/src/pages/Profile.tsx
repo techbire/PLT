@@ -45,6 +45,11 @@ const Profile: React.FC = () => {
   useEffect(() => {
     if (!user?.id) return;
     
+    const userId = user.id;
+    const userFirstName = user.firstName;
+    const userLastName = user.lastName;
+    const userReadingGoal = user.readingGoal;
+    
     const fetchProfile = async () => {
       try {
         setLoading(true);
@@ -86,14 +91,18 @@ const Profile: React.FC = () => {
         setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
         
         // If blocked by client (ad blocker), try to show cached user data
-        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && user?.id) {
-          const currentUser = user;
-          setProfile(currentUser);
+        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && userId) {
+          setProfile({
+            id: userId,
+            firstName: userFirstName,
+            lastName: userLastName,
+            readingGoal: userReadingGoal
+          });
           setEditData({
-            firstName: currentUser.firstName || '',
-            lastName: currentUser.lastName || '',
+            firstName: userFirstName || '',
+            lastName: userLastName || '',
             bio: '',
-            readingGoal: currentUser.readingGoal?.yearly || 12,
+            readingGoal: userReadingGoal?.yearly || 12,
             showProfile: true
           });
         }
