@@ -19,12 +19,10 @@ import {
   CloudUpload as UploadIcon,
   Person as PersonIcon
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
 import { getAssetUrl } from '../utils/urls';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [editing, setEditing] = useState(false);
