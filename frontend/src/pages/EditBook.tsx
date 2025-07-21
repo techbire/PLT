@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -55,39 +55,39 @@ const EditBook: React.FC = () => {
     { value: 'Read', label: 'Read' }
   ];
 
-  useEffect(() => {
-    const fetchBook = async () => {
-      try {
-        setLoading(true);
-        if (id) {
-          const response = await bookService.getBook(id);
-          const book = response.book;
-          
-          setFormData({
-            title: book.title || '',
-            author: book.author || '',
-            genre: book.genre || '',
-            status: book.status || 'To Read',
-            description: book.description || '',
-            isbn: book.isbn || '',
-            publishedDate: book.publishedDate || '',
-            pageCount: book.pageCount?.toString() || '',
-            language: book.language || ''
-          });
-          
-          if (book.coverImage) {
-            setCoverPreview(book.coverImage);
-          }
+  const fetchBook = useCallback(async () => {
+    try {
+      setLoading(true);
+      if (id) {
+        const response = await bookService.getBook(id);
+        const book = response.book;
+        
+        setFormData({
+          title: book.title || '',
+          author: book.author || '',
+          genre: book.genre || '',
+          status: book.status || 'To Read',
+          description: book.description || '',
+          isbn: book.isbn || '',
+          publishedDate: book.publishedDate || '',
+          pageCount: book.pageCount?.toString() || '',
+          language: book.language || ''
+        });
+        
+        if (book.coverImage) {
+          setCoverPreview(book.coverImage);
         }
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to fetch book');
-      } finally {
-        setLoading(false);
       }
-    };
-
-    fetchBook();
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to fetch book');
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchBook();
+  }, [fetchBook]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
