@@ -23,6 +23,7 @@ import {
   MenuBook as BookIcon
 } from '@mui/icons-material';
 import { bookService } from '../services/bookService';
+import { getAssetUrl } from '../utils/urls';
 
 const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -137,7 +138,7 @@ const BookDetail: React.FC = () => {
             <Box sx={{ p: 2, textAlign: 'center' }}>
               {book.coverImage ? (
                 <img
-                  src={book.coverImage.startsWith('http') ? book.coverImage : `http://localhost:5000${book.coverImage}`}
+                  src={getAssetUrl(book.coverImage)}
                   alt={book.title}
                   style={{
                     width: '100%',
