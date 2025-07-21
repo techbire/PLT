@@ -43,9 +43,70 @@ const Profile: React.FC = () => {
   });
 
   useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch both profile and dashboard data
+        const [profileResponse, dashboardResponse] = await Promise.all([
+          authService.getProfile(),
+          authService.getDashboard()
+        ]);
+        
+        // Handle the response based on the backend format
+        let profileData;
+        if (profileResponse.user) {
+          profileData = profileResponse.user;
+        } else if (profileResponse.data && profileResponse.data.user) {
+          profileData = profileResponse.data.user;
+        } else {
+          profileData = profileResponse;
+        }
+        
+        setProfile(profileData);
+        setDashboardData(dashboardResponse.data || dashboardResponse);
+        
+        setEditData({
+          firstName: profileData.firstName || '',
+          lastName: profileData.lastName || '',
+          bio: profileData.bio || '',
+          readingGoal: profileData.preferences?.readingGoal || profileData.readingGoal?.yearly || 12,
+          showProfile: profileData.preferences?.privacy?.showProfile ?? true
+        });
+
+        // Fix avatar display - handle both relative and absolute URLs
+        if (profileData.avatar) {
+          const avatarUrl = getAssetUrl(profileData.avatar);
+          setAvatarPreview(avatarUrl);
+        }
+        
+        // Update the AuthContext user data with the latest profile info
+        if (profileData.avatar && user) {
+          const updatedUser = { ...user, avatar: profileData.avatar };
+          window.dispatchEvent(new CustomEvent('userDataUpdated', { detail: updatedUser }));
+        }
+      } catch (err: any) {
+        console.error('Profile fetch error:', err);
+        setError(err.response?.data?.message || err.message || 'Failed to fetch profile');
+        
+        // If blocked by client (ad blocker), try to show cached user data
+        if (err.message?.includes('ERR_BLOCKED_BY_CLIENT') && user) {
+          setProfile(user);
+          setEditData({
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            bio: '',
+            readingGoal: user.readingGoal?.yearly || 12,
+            showProfile: true
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [user?.id]); // Only depend on user ID, not the entire user object
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -94,11 +155,7 @@ const Profile: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
-
-  useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
