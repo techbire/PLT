@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Navbar } from './components';
+import { Navbar, DebugInfo } from './components';
 import { 
   Login, 
   Register, 
@@ -158,6 +158,7 @@ function App() {
       <AuthProvider>
         <Router>
           <AppContent />
+          <DebugInfo />
         </Router>
       </AuthProvider>
     </ThemeProvider>
