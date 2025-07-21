@@ -29,6 +29,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import bookService, { Book } from '../services/bookService';
+import { getAssetUrl } from '../utils/urls';
 
 const Books: React.FC = () => {
   const navigate = useNavigate();
@@ -206,7 +207,7 @@ const Books: React.FC = () => {
                     <CardMedia
                       component="img"
                       height="280"
-                      image={book.coverImage.startsWith('http') ? book.coverImage : `http://localhost:5000${book.coverImage}`}
+                      image={getAssetUrl(book.coverImage)}
                       alt={book.title}
                       sx={{ 
                         objectFit: 'cover',

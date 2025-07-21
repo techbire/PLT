@@ -21,6 +21,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { authService } from '../services/authService';
+import { getAssetUrl } from '../utils/urls';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -88,9 +89,7 @@ const Profile: React.FC = () => {
 
       // Fix avatar display - handle both relative and absolute URLs
       if (profileData.avatar) {
-        const avatarUrl = profileData.avatar.startsWith('http') 
-          ? profileData.avatar 
-          : `http://localhost:5000${profileData.avatar}`;
+        const avatarUrl = getAssetUrl(profileData.avatar);
         setAvatarPreview(avatarUrl);
       }
       

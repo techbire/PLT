@@ -19,6 +19,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getAssetUrl } from '../utils/urls';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -42,10 +43,7 @@ const Navbar: React.FC = () => {
 
   const getAvatarUrl = (avatarPath: string) => {
     if (!avatarPath) return undefined;
-    if (avatarPath.startsWith('http')) {
-      return avatarPath;
-    }
-    return `http://localhost:5000${avatarPath}`;
+    return getAssetUrl(avatarPath);
   };
 
   const isActive = (path: string) => location.pathname === path;

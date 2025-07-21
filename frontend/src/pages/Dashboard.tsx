@@ -37,7 +37,8 @@ const Dashboard: React.FC = () => {
       setStats(response.statusStats);
       
       // Also refresh user data to get updated reading goal
-      const userResponse = await fetch('http://localhost:5000/api/user/me', {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+      const userResponse = await fetch(`${API_BASE_URL}/user/me`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
