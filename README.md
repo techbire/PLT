@@ -17,10 +17,37 @@ A full-stack MERN (MongoDB, Express, React, Node.js) application for tracking yo
 
 ## 📸 Screenshots
 
-<!-- Add screenshots of your application here -->
-![Dashboard](screenshots/dashboard.png)
-![Book Collection](screenshots/books.png)
-![Add Book](screenshots/add-book.png)
+   ### Dashboard
+   ![Dashboard](screenshots/dashboard.png)
+   *Main dashboard showing reading statistics and recent activity*
+
+   ### Book Collection
+   ![Book Collection](screenshots/books.png)
+   *Complete library view with filtering and sorting options*
+
+   ### Add New Book
+   ![Add Book Form](screenshots/add-book.png)
+   *Form for adding books manually or via Google Books API*
+
+   ### Book Details
+   ![Book Details](screenshots/book-detail.png)
+   *Detailed view of a book with reading progress and notes*
+
+   ### User Profile
+   ![User Profile](screenshots/profile.png)
+   *User profile with reading preferences and statistics*
+
+   ### All Users
+   ![All Users](screenshots/all-users.png)
+   *View of all registered users with management options*
+
+   ### Login Page
+   ![Login Screen](screenshots/login.png)
+   *Authentication screen for user login*
+
+   ### Responsive Design
+   ![Mobile View](screenshots/responsive.png)
+   *Mobile-responsive layout showing adaptability across devices*
 
 ## Features
 
